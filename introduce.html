@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>.r4q8</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+        * { font-family: 'JetBrains Mono', monospace; }
+        .video-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(255,255,255,0.4)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 14px rgba(255,255,255,0.9)); transform: scale(1.08); }
+        }
+
+        @keyframes slash-draw {
+            0% { stroke-dashoffset: 2000; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        @keyframes split-tr {
+            0% { transform: translate(-50%,-50%); }
+            100% { transform: translate(60%, -60%); opacity: 0; }
+        }
+        @keyframes split-bl {
+            0% { transform: translate(-50%,-50%); }
+            100% { transform: translate(-160%, 60%); opacity: 0; }
+        }
+
+        @keyframes fade-up {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        #intro { transition: opacity 0.6s ease; z-index: 50; background-color: #000000; }
+        #intro.done { opacity: 0; pointer-events: none; }
+
+        .enter-btn { animation: pulse-glow 2.2s infinite ease-in-out; cursor: pointer; }
+        .enter-btn:hover { filter: drop-shadow(0 0 20px #fff) !important; }
+
+        .sliced .panel-tr { animation: split-tr 1s cubic-bezier(.4,0,.2,1) forwards; }
+        .sliced .panel-bl { animation: split-bl 1s cubic-bezier(.4,0,.2,1) forwards; }
+        .sliced .slash-line { animation: slash-draw 0.6s ease forwards; }
+
+        .profile-card { animation: fade-up 0.8s ease both; }
+        .profile-card.delayed { animation-delay: 0.3s; }
+
+        .social-link {
+            transition: all 0.25s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .social-link:hover {
+            border-color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-2px);
+        }
+
+        .avatar-ring {
+            background: conic-gradient(#fff 0deg, #666 120deg, #fff 240deg, #666 360deg);
+            padding: 3px;
+            border-radius: 9999px;
+            animation: spin-slow 8s linear infinite;
+        }
+        @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+        .typing::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .social-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ddd;
+            padding: 12px 15px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .social-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.1);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+            z-index: 0;
+        }
+
+        .social-btn:hover {
+            color: #fff;
+            border-color: #fff;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.15);
+        }
+        .social-btn:hover::before { transform: scaleX(1); transform-origin: left; }
+        .social-btn > * { position: relative; z-index: 1; }
+    </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto bg-black text-white relative">
+   
+   <video id="bg-video" class="video-bg opacity-0" loop muted playsinline>
+    <source src="aa.mp4" type="video/mp4">
+   </video>
+
+   <div id="intro" class="fixed inset-0 flex items-center justify-center bg-black">
+    <svg class="absolute z-10 pointer-events-none" style="top:50%;left:50%;transform:translate(-50%,-50%);width:200vmax;height:200vmax;" viewBox="0 0 1000 1000" fill="none">
+     <line class="slash-line" x1="0" y1="1000" x2="1000" y2="0" stroke="white" stroke-width="2" stroke-dasharray="2000" stroke-dashoffset="2000" />
+    </svg>
+    <button class="enter-btn relative z-20" style="width:64px;height:64px;background:none;border:none;" onclick="triggerSlice()">
+     <svg viewBox="0 0 24 24" fill="white" class="w-full h-full">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+     </svg>
+    </button>
+   </div>
+
+   <div id="main-content" class="w-full h-full flex items-center justify-center p-6 opacity-0 transition-opacity duration-700 relative z-10" style="background: radial-gradient(ellipse at center, rgba(17,17,17,0.4) 0%, rgba(0,0,0,0.75) 70%); backdrop-filter: blur(2px);">
+    <div class="max-w-md w-full space-y-6">
+     
+     <div class="profile-card flex flex-col items-center text-center space-y-4">
+      <div class="avatar-ring">
+       <img class="w-24 h-24 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-3xl" src="images.jpg" alt="avatar" />
+      </div>
+      <div>
+       <h1 id="display-username" class="text-2xl font-bold tracking-tight">.r4q8</h1>
+       <p id="display-tagline" class="text-sm text-gray-400 mt-1 typing">Python Developer | 16y | Falling in love</p>
+      </div>
+     </div>
+
+     <div class="profile-card delayed rounded-2xl p-5 space-y-3" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-center gap-3 text-sm text-gray-300">
+       <i data-lucide="terminal" class="w-4 h-4 text-white"></i> 
+       <span>Python · HTML/CSS</span>
+      </div>
+      <div class="flex items-center gap-3 text-sm text-gray-300">
+       <i data-lucide="clock" class="w-4 h-4 text-white"></i> 
+       <span id="live-time" class="tabular-nums">--:--:--</span>
+      </div>
+     </div>
+
+    <div class="profile-card delayed max-w-[180px] mx-auto">
+        <a href="https://discord.gg/Knontop" class="social-btn !py-1.5 !px-3 !text-xs">
+    <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
+    </svg>
+            <span>Discord</span>
+        </a>
+    </div>
+
+     <div class="profile-card delayed text-center text-xs text-gray-600 pt-2">
+      <span class="typing">print"hello"</span>
+     </div>
+
+    </div>
+   </div>
+  </div>
+
+  <script>
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('live-time').textContent = now.toLocaleTimeString('en-US', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function triggerSlice() {
+        const intro = document.getElementById('intro');
+        intro.classList.add('sliced');
+        
+        const video = document.getElementById('bg-video');
+        if (video) {
+            video.classList.remove('opacity-0');
+            video.classList.add('opacity-100');
+            video.muted = false;
+            video.play().catch(err => console.log("Audio play blocked: ", err));
+        }
+
+        setTimeout(() => {
+            intro.classList.add('done');
+            document.getElementById('main-content').style.opacity = '1';
+        }, 1000);
+        setTimeout(() => { intro.style.display = 'none'; }, 1600);
+    }
+
+    lucide.createIcons();
+
+    const defaultConfig = {
+        username: 'kaelx_0327',
+        tagline: 'Python Developer | 14y | Hold It On',
+        background_color: '#000000',
+        text_color: '#ffffff',
+        accent_color: '#333333',
+        font_family: 'JetBrains Mono',
+        font_size: 16
+    };
+
+    function applyConfig(config) {
+        const c = { ...defaultConfig, ...config };
+        document.getElementById('display-username').textContent = c.username;
+        document.getElementById('display-tagline').textContent = c.tagline;
+
+        const app = document.getElementById('app');
+        const main = document.getElementById('main-content');
+        
+        app.style.backgroundColor = c.background_color;
+        main.style.background = `radial-gradient(ellipse at center, ${c.accent_color}80 0%, ${c.background_color}D9 70%)`;
+
+        document.querySelectorAll('h1, .social-link, span, p, a, div').forEach(el => {
+            if (el.id === 'display-username') el.style.color = c.text_color;
+        });
+        document.getElementById('display-username').style.fontFamily = `${c.font_family}, monospace`;
+        document.getElementById('display-tagline').style.fontFamily = `${c.font_family}, monospace`;
+
+        const base = c.font_size;
+        document.getElementById('display-username').style.fontSize = `${base * 1.5}px`;
+        document.getElementById('display-tagline').style.fontSize = `${base * 0.875}px`;
+    }
+
+    window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (config) => applyConfig(config),
+        mapToCapabilities: (config) => ({
+            recolorables: [
+                { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+                { get: () => config.accent_color || defaultConfig.accent_color, set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
+                { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } }
+            ],
+            borderables: [],
+            fontEditable: {
+                get: () => config.font_family || defaultConfig.font_family,
+                set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+            },
+            fontSizeable: {
+                get: () => config.font_size || defaultConfig.font_size,
+                set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+            }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+            ['username', config.username || defaultConfig.username],
+            ['tagline', config.tagline || defaultConfig.tagline]
+        ])
+    });
+  </script>
+  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fcace2e541b4a9c',t:'MTc3ODkzODk0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+ </body>
+</html>
