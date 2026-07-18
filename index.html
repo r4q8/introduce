@@ -1,528 +1,190 @@
-<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>.r4q8</title>
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-/* ═══════════════════════════════════════
-   RESET & BASE
-   ═══════════════════════════════════════ */
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { font-size:16px; -webkit-text-size-adjust:100%; }
-html, body {
-  width:100%; height:100%;
-  overflow:hidden;
-  background:#000; color:#fff;
-  font-family:'JetBrains Mono', monospace;
-  -webkit-font-smoothing: antialiased;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM UPDATE // 系統升級中</title>
+    <style>
 
-/* ═══════════════════════════════════════
-   FIXED LAYER — Video BG
-   ═══════════════════════════════════════ */
-#bg-video {
-  position:fixed; top:0; left:0;
-  width:100vw; height:100vh;
-  object-fit:cover; object-position:center;
-  z-index:0; opacity:0;
-  transition:opacity 1.8s ease;
-}
-#bg-video.on { opacity:.55; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
 
-/* ═══════════════════════════════════════
-   FIXED LAYER — Dark overlay
-   ═══════════════════════════════════════ */
-#overlay {
-  position:fixed; inset:0; z-index:1;
-  background:
-    radial-gradient(ellipse at 25% 20%, rgba(124,58,237,.12) 0%, transparent 55%),
-    radial-gradient(ellipse at 75% 80%, rgba(6,182,212,.08) 0%, transparent 55%),
-    rgba(0,0,0,.82);
-  pointer-events:none;
-}
+        body {
+            background-color: #050508;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
 
-/* ═══════════════════════════════════════
-   SCROLL CONTAINER — the ONLY scrollable layer
-   ═══════════════════════════════════════ */
-#viewport {
-  position:fixed; inset:0;
-  overflow-y:auto; overflow-x:hidden;
-  z-index:2;
-  scroll-behavior:smooth;
-}
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(18, 24, 38, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(18, 24, 38, 0.5) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center;
+            z-index: 1;
+        }
 
-/* Flex wrapper to centre column vertically */
-#page {
-  display:flex; align-items:center; justify-content:center;
-  min-height:100%;
-  padding:80px 24px;
-}
+        .glow-bg {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, rgba(138, 43, 226, 0.05) 50%, transparent 100%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            filter: blur(40px);
+            pointer-events: none;
+        }
 
-/* Constrain width */
-.col { width:100%; max-width:500px; }
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
 
-/* ═══════════════════════════════════════
-   INTRO SPLASH
-   ═══════════════════════════════════════ */
-@keyframes glow {
-  0%,100% { filter:drop-shadow(0 0 6px rgba(255,255,255,.4)) drop-shadow(0 0 24px rgba(124,58,237,.3)); transform:scale(1); }
-  50%      { filter:drop-shadow(0 0 16px rgba(255,255,255,.9)) drop-shadow(0 0 40px rgba(124,58,237,.6)); transform:scale(1.07); }
-}
-@keyframes slash-appear { to { stroke-dashoffset:0; } }
+        .loader-ring {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+        }
 
-#intro {
-  position:fixed; inset:0;
-  display:flex; align-items:center; justify-content:center;
-  background:#000; z-index:200;
-  transition:opacity .6s ease, visibility .6s ease;
-}
-#intro.hide { opacity:0; visibility:hidden; pointer-events:none; }
+        .ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-radius: 50%;
+            animation: rotate 4s linear infinite;
+        }
 
-#slash-svg {
-  position:absolute; top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  width:200vmax; height:200vmax;
-  pointer-events:none;
-}
-#slash-svg line {
-  stroke:#fff; stroke-width:1.5;
-  stroke-dasharray:2200; stroke-dashoffset:2200;
-}
-#slash-svg.play line { animation:slash-appear .6s ease-out forwards; }
+        .ring-1 {
+            border-top-color: #00f2fe;
+            border-bottom-color: #00f2fe;
+            animation-duration: 3s;
+        }
 
-#enter-btn {
-  position:relative; z-index:2;
-  width:68px; height:68px;
-  background:none; border:none; cursor:pointer;
-  animation:glow 2.4s infinite ease-in-out;
-  border-radius:50%;
-  outline:none;
-  transition:transform .25s;
-}
-#enter-btn:hover { transform:scale(1.12); }
+        .ring-2 {
+            width: 85%;
+            height: 85%;
+            border-left-color: #8a2be2;
+            border-right-color: #8a2be2;
+            animation-direction: reverse;
+            animation-duration: 2s;
+        }
 
-/* ═══════════════════════════════════════
-   CARD FADE-IN (staggered)
-   ═══════════════════════════════════════ */
-@keyframes card-in {
-  from { opacity:0; transform:translateY(22px) scale(.98); }
-  to   { opacity:1; transform:translateY(0) scale(1); }
-}
-.c {
-  opacity:0;
-  animation:card-in .65s ease both;
-}
-.c1  { animation-delay:.05s; }
-.c2  { animation-delay:.12s; }
-.c3  { animation-delay:.19s; }
-.c4  { animation-delay:.26s; }
-.c5  { animation-delay:.33s; }
-.c6  { animation-delay:.40s; }
-.c7  { animation-delay:.47s; }
-.c8  { animation-delay:.54s; }
+        .ring-3 {
+            width: 70%;
+            height: 70%;
+            border-top-color: #00ff87;
+            animation-duration: 4s;
+        }
 
-/* ═══════════════════════════════════════
-   AVATAR — ring + float
-   ═══════════════════════════════════════ */
-@keyframes ring-spin { to { transform:rotate(360deg); } }
-@keyframes hover   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+        .core {
+            width: 20px;
+            height: 20px;
+            background-color: #00f2fe;
+            border-radius: 50%;
+            box-shadow: 0 0 30px #00f2fe, 0 0 60px #00f2fe;
+            animation: pulse 1.5s ease-in-out infinite alternate;
+        }
 
-.a-wrap {
-  width:116px; height:116px; position:relative;
-  animation:hover 5s ease-in-out infinite;
-}
-.a-ring {
-  position:absolute; inset:-3px;
-  border-radius:50%;
-  background:conic-gradient(from 0deg,#7c3aed,#06b6d4,#7c3aed);
-  animation:ring-spin 4s linear infinite;
-}
-.a-ring::after {
-  content:''; position:absolute; inset:3px;
-  border-radius:50%; background:#000;
-}
-.a-img {
-  position:absolute; inset:3px;
-  width:110px; height:110px;
-  border-radius:50%; object-fit:cover; z-index:2;
-}
 
-/* ═══════════════════════════════════════
-   GRADIENT TEXT
-   ═══════════════════════════════════════ */
-@keyframes grad-move {
-  0%   { background-position:0% 50%; }
-  50%  { background-position:100% 50%; }
-  100% { background-position:0% 50%; }
-}
-.gtext {
-  background:linear-gradient(135deg,#fff 0%,#a78bfa 50%,#06b6d4 100%);
-  background-size:200% 200%;
-  animation:grad-move 4s ease infinite;
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-}
+        .status-tag {
+            font-size: 12px;
+            letter-spacing: 4px;
+            color: #00f2fe;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            padding: 4px 12px;
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            border-radius: 4px;
+            background: rgba(0, 242, 254, 0.05);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.1);
+        }
 
-/* ═══════════════════════════════════════
-   GLASS PANEL
-   ═══════════════════════════════════════ */
-.glass {
-  background:rgba(255,255,255,.035);
-  backdrop-filter:blur(24px);
-  -webkit-backdrop-filter:blur(24px);
-  border:1px solid rgba(255,255,255,.07);
-  border-radius:16px;
-  transition:border-color .3s, background .3s, box-shadow .3s;
-}
-.glass:hover {
-  background:rgba(255,255,255,.065);
-  border-color:rgba(124,58,237,.25);
-  box-shadow:0 0 40px rgba(124,58,237,.05);
-}
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: 6px;
+            background: linear-gradient(45deg, #ffffff 30%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
 
-/* ═══════════════════════════════════════
-   STATUS DOT
-   ═══════════════════════════════════════ */
-@keyframes dot-pulse { 50% { opacity:.3; } }
-.dot {
-  width:8px; height:8px; border-radius:50%;
-  background:#22c55e;
-  box-shadow:0 0 10px rgba(34,197,94,.5);
-  animation:dot-pulse 2s step-end infinite;
-  flex-shrink:0;
-}
+        p {
+            font-size: 1rem;
+            color: #9ca3af;
+            letter-spacing: 2px;
+            font-weight: 300;
+        }
 
-/* ═══════════════════════════════════════
-   TYPING CURSOR
-   ═══════════════════════════════════════ */
-@keyframes cur { 50% { opacity:0; } }
-.type::after {
-  content:'▎';
-  animation:cur 1s step-end infinite;
-  margin-left:1px;
-}
+        .progress-bar-container {
+            width: 250px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 2px;
+        }
 
-/* ═══════════════════════════════════════
-   BADGE
-   ═══════════════════════════════════════ */
-.badge {
-  display:inline-flex; align-items:center; gap:6px;
-  padding:5px 14px; border-radius:999px;
-  font-size:11px; font-weight:500;
-  background:rgba(124,58,237,.1);
-  border:1px solid rgba(124,58,237,.22);
-  color:#a78bfa;
-  white-space:nowrap;
-}
+        .progress-line {
+            position: absolute;
+            height: 100%;
+            width: 40%;
+            background: linear-gradient(90deg, #8a2be2, #00f2fe);
+            box-shadow: 0 0 10px #00f2fe;
+            animation: loading 2.5s ease-in-out infinite;
+        }
 
-/* ═══════════════════════════════════════
-   SHIMMER DIVIDER
-   ═══════════════════════════════════════ */
-@keyframes shimmer { to { background-position:200% 0; } }
-.line {
-  width:100%; height:1px;
-  background:linear-gradient(90deg, transparent 0%, rgba(124,58,237,.45) 35%, rgba(6,182,212,.45) 65%, transparent 100%);
-  background-size:200% 100%;
-  animation:shimmer 3s linear infinite;
-}
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-/* ═══════════════════════════════════════
-   STATS GRID
-   ═══════════════════════════════════════ */
-.stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-.stat {
-  text-align:center; padding:16px 8px;
-  border-radius:14px;
-  background:rgba(255,255,255,.025);
-  border:1px solid rgba(255,255,255,.05);
-  transition:transform .2s, border-color .2s;
-}
-.stat:hover {
-  transform:translateY(-3px);
-  border-color:rgba(124,58,237,.25);
-}
-.stat-n { font-size:22px; font-weight:700; }
-.stat-l { font-size:9px; color:#555; text-transform:uppercase; letter-spacing:1.5px; margin-top:4px; }
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.5; box-shadow: 0 0 20px #00f2fe; }
+            100% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 40px #00f2fe, 0 0 80px #00f2fe; }
+        }
 
-/* ═══════════════════════════════════════
-   SKILL BARS
-   ═══════════════════════════════════════ */
-.s-track {
-  width:100%; height:5px;
-  background:rgba(255,255,255,.06);
-  border-radius:99px; overflow:hidden;
-}
-.s-bar {
-  height:100%; width:0%;
-  border-radius:99px;
-  transition:width 1.4s cubic-bezier(.4,0,.2,1);
-}
-
-/* ═══════════════════════════════════════
-   TECH MARQUEE
-   ═══════════════════════════════════════ */
-@keyframes scroll { to { transform:translateX(-50%); } }
-.mq-wrap {
-  overflow:hidden;
-  mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-  -webkit-mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-}
-.mq {
-  display:flex; gap:14px; width:max-content;
-  animation:scroll 20s linear infinite;
-}
-.mq span {
-  flex-shrink:0;
-  padding:5px 14px; border-radius:99px;
-  font-size:11px; color:#777;
-  border:1px solid rgba(255,255,255,.05);
-  background:rgba(255,255,255,.015);
-}
-
-/* ═══════════════════════════════════════
-   SOCIAL BUTTONS
-   ═══════════════════════════════════════ */
-.sbtn {
-  display:flex; align-items:center; justify-content:center; gap:10px;
-  padding:14px 20px; border-radius:14px;
-  font-size:13px; font-weight:600;
-  text-decoration:none; color:#bbb;
-  background:rgba(255,255,255,.035);
-  border:1px solid rgba(255,255,255,.08);
-  transition:all .3s ease;
-}
-.sbtn:hover {
-  color:#fff;
-  border-color:rgba(124,58,237,.45);
-  background:rgba(124,58,237,.12);
-  transform:translateY(-3px);
-  box-shadow:0 8px 30px rgba(124,58,237,.1);
-}
-
-/* ═══════════════════════════════════════
-   EQUALIZER
-   ═══════════════════════════════════════ */
-@keyframes eq-a { 0%,100%{height:30%} 50%{height:100%} }
-@keyframes eq-b { 0%,100%{height:70%} 50%{height:35%} }
-@keyframes eq-c { 0%,100%{height:50%} 50%{height:90%} }
-.eq { display:flex; align-items:flex-end; gap:2px; height:18px; flex-shrink:0; }
-.eq i { width:3px; border-radius:2px; display:block; }
-.eq i:nth-child(1) { animation:eq-a 1s ease infinite; background:#a78bfa; }
-.eq i:nth-child(2) { animation:eq-b .8s ease infinite .15s; background:#06b6d4; }
-.eq i:nth-child(3) { animation:eq-c 1.1s ease infinite .3s; background:#a78bfa; }
-.eq i:nth-child(4) { animation:eq-b .9s ease infinite .1s; background:#06b6d4; }
-
-/* ═══════════════════════════════════════
-   SCROLLBAR
-   ═══════════════════════════════════════ */
-::-webkit-scrollbar { width:3px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:rgba(255,255,255,.08); border-radius:4px; }
-::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,.15); }
-
-/* ═══════════════════════════════════════
-   SECTION HEADER
-   ═══════════════════════════════════════ */
-.sec-hd {
-  display:flex; align-items:center; gap:7px;
-  font-size:10px; color:#555;
-  text-transform:uppercase; letter-spacing:2px;
-  font-weight:600;
-}
-</style>
+        @keyframes loading {
+            0% { left: -40%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+    </style>
 </head>
 <body>
-
-<!-- ── LAYER 0: Video Background ── -->
-<video id="bg-video" loop muted playsinline>
-  <source src="aa.mp4" type="video/mp4">
-</video>
-
-<!-- ── LAYER 1: Dark Overlay ── -->
-<div id="overlay"></div>
-
-<!-- ── LAYER 200: Intro Splash ── -->
-<div id="intro">
-  <svg id="slash-svg" viewBox="0 0 1000 1000" fill="none">
-    <line x1="0" y1="1000" x2="1000" y2="0" />
-  </svg>
-  <button id="enter-btn" onclick="enterSite()" aria-label="Enter">
-    <svg viewBox="0 0 24 24" fill="#fff" width="68" height="68">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-    </svg>
-  </button>
-</div>
-
-<!-- ── LAYER 2: Scrollable Page ── -->
-<div id="viewport">
-  <div id="page">
-    <div class="col">
-      <div class="c c1" style="text-align:center; padding-bottom:32px;">
-        <div style="display:flex; justify-content:center; margin-bottom:18px;">
-          <div class="a-wrap">
-            <div class="a-ring"></div>
-            <img class="a-img" src="images.jpg" alt="avatar" loading="eager">
-          </div>
+    <div class="container">
+        <div class="status-tag">SYSTEM MAINTENANCE</div>
+        <h1>網站正在更新</h1>
+        <p>website is up dating</p><!DOCTYPE html>
+        <div class="progress-bar-container">
+            <div class="progress-line"></div>
         </div>
-        <h1 class="gtext" style="font-size:30px; font-weight:700; letter-spacing:-.5px;">
-          .r4q8
-        </h1>
-        <div style="display:flex; align-items:center; justify-content:center; gap:7px; margin-top:10px;">
-          <span class="dot"></span>
-          <span class="type" style="font-size:12px; color:#999;">
-            Python Developer &bull; 16y &bull; Falling in love
-          </span>
-        </div>
-        <div style="margin-top:16px;">
-          <span class="badge">
-            🌏 Taiwan &bull; <span id="clock" style="font-variant-numeric:tabular-nums;">--:--:--</span>
-          </span>
-        </div>
-      </div>
-      <div class="line" style="margin:10px 0 20px;"></div>
+    </div>
 
-      <div class="c c2 glass" style="padding:22px; margin-bottom:18px;">
-        <div class="sec-hd" style="margin-bottom:12px;">
-          <span style="color:#a78bfa;">👤</span> About Me
-        </div>
-        <p style="font-size:13px; line-height:1.75; color:#c8c8c8; font-weight:300;"> GuGuGaGa THIS MADE BY AI
-        </p>
-      </div>
-
-      <div class="stats" style="margin-bottom:18px;">
-        <div class="c c3 stat"><div class="stat-n gtext">16</div><div class="stat-l">Age</div></div>
-        <div class="c c3 stat" style="animation-delay:.07s;"><div class="stat-n gtext">PY</div><div class="stat-l">Main Lang</div></div>
-        <div class="c c3 stat" style="animation-delay:.14s;"><div class="stat-n gtext">∞</div><div class="stat-l">Curiosity</div></div>
-      </div>
-
-      <div class="c c4 glass" style="padding:22px; margin-bottom:18px;">
-        <div class="sec-hd" style="margin-bottom:16px;">
-          <span style="color:#06b6d4;">⚡</span> Skills
-        </div>
-        <div style="display:flex; flex-direction:column; gap:13px;">
-          <div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;">
-              <span style="color:#ccc;">Python</span><span style="color:#a78bfa;">85%</span>
-            </div>
-            <div class="s-track"><div class="s-bar" data-w="85" style="background:linear-gradient(90deg,#7c3aed,#a78bfa);"></div></div>
-          </div>
-          <div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;">
-              <span style="color:#ccc;">HTML / CSS</span><span style="color:#06b6d4;">75%</span>
-            </div>
-            <div class="s-track"><div class="s-bar" data-w="75" style="background:linear-gradient(90deg,#06b6d4,#22d3ee);"></div></div>
-          </div>
-          <div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;">
-              <span style="color:#ccc;">JavaScript</span><span style="color:#eab308;">60%</span>
-            </div>
-            <div class="s-track"><div class="s-bar" data-w="60" style="background:linear-gradient(90deg,#eab308,#facc15);"></div></div>
-          </div>
-          <div>
-            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;">
-              <span style="color:#ccc;">Linux / Git</span><span style="color:#22c55e;">70%</span>
-            </div>
-            <div class="s-track"><div class="s-bar" data-w="70" style="background:linear-gradient(90deg,#22c55e,#4ade80);"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="c c5 glass" style="padding:18px; margin-bottom:18px;">
-        <div class="sec-hd" style="margin-bottom:12px;">
-          <span style="color:#f472b6;">🧰</span> Tech Stack
-        </div>
-        <div class="mq-wrap">
-          <div class="mq">
-            <span>Python</span><span>HTML5</span><span>CSS3</span><span>JavaScript</span>
-            <span>Node.js</span><span>Git</span><span>Linux</span><span>VS Code</span>
-            <span>Docker</span><span>REST APIs</span>
-            <!-- duplicate for seamless loop -->
-            <span>Python</span><span>HTML5</span><span>CSS3</span><span>JavaScript</span>
-            <span>Node.js</span><span>Git</span><span>Linux</span><span>VS Code</span>
-            <span>Docker</span><span>REST APIs</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="line" style="margin:10px 0 20px;"></div>
-
-      <div class="c c6" style="margin-bottom:18px;">
-        <div class="sec-hd" style="margin-bottom:14px;">
-          <span style="color:#a78bfa;">🔗</span> Find Me
-        </div>
-        <div style="display:flex; flex-direction:column; gap:10px; max-width:270px; margin:0 auto;">
-          <a href="https://discord.gg/Knontop" class="sbtn">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-            Discord Community
-          </a>
-          <a href="https://github.com/r4q8" class="sbtn">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            GitHub
-          </a>
-        </div>
-      </div>
-
-      <div class="line" style="margin:10px 0 20px;"></div>
-
-      <div class="c c7 glass" style="padding:16px 20px; margin-bottom:18px;">
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg,#7c3aed,#06b6d4); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;">🎵</div>
-          <div style="flex:1; min-width:0;">
-            <div style="font-size:9px; color:#555; text-transform:uppercase; letter-spacing:1.5px;">Vibing to</div>
-            <div style="font-size:13px; color:#ccc; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">lofi hip hop — chill beats</div>
-          </div>
-          <div class="eq"><i></i><i></i><i></i><i></i></div>
-        </div>
-      </div>
-
-      <div class="c c8" style="text-align:center; padding:18px 0 12px;">
-        <p class="type" style="font-size:11px; color:#444; italic;">"Code is poetry written in logic."</p>
-      </div>
-
-      <div style="text-align:center; font-size:10px; color:#333; padding:0 0 40px;">
-        © 2026 .r4q8 — Built with 💜 and Python
-      </div>
-
-    </div><!-- .col -->
-  </div><!-- #page -->
-</div><!-- #viewport -->
-
-<script>
-/* ── Live Clock ── */
-function tick() {
-  const el = document.getElementById('clock');
-  if (el) el.textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
-}
-setInterval(tick, 1000);
-tick();
-
-/* ── Enter Site ── */
-function enterSite() {
-  // 1. Play slash animation
-  document.getElementById('slash-svg').classList.add('play');
-
-  // 2. Activate video background
-  const v = document.getElementById('bg-video');
-  v.classList.add('on');
-  v.muted = false;
-  v.play().catch(() => {});
-
-  // 3. Trigger skill bars after a short delay
-  setTimeout(() => {
-    document.querySelectorAll('.s-bar').forEach(b => {
-      b.style.width = b.getAttribute('data-w') + '%';
-    });
-  }, 700);
-
-  // 4. Fade out intro
-  setTimeout(() => {
-    document.getElementById('intro').classList.add('hide');
-  }, 600);
-}
-</script>
 </body>
 </html>
